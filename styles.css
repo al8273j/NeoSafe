@@ -1,0 +1,57 @@
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-image: linear-gradient(#ADE8F4, #00B4D8);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input[type="number"] {
+    padding: 8px;
+    font-size: 1rem;
+    width: calc(100% - 20px); /* Adjust width to fit within card padding */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures padding and border are included in width */
+}
+
+button {
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    background-color: #001f3f; /* Navy blue color */
+    color: white;
+    border: none;
+    border-radius: 20px; /* Rounded edges */
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 20px;
+}

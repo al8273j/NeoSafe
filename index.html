@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetal and Maternal Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+#recommendations-card {
+            position: absolute; /* or fixed, depending on your preference */
+            right: 80px;         /* Distance from the right side of the screen */
+            top: 125px;          /* Adjust based on where you want it vertically */
+            z-index: 1000;       /* Ensure it's on top of other content */
+            width: 26rem;        /* Adjust card width as needed */
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+.container {
+    display: flex;
+    justify-content: flex-start;  /* Aligns cards to the left */
+    width: 100%;
+    max-width: 1200px;
+    gap: 20px;
+    margin-top: 100px;  /* Adjusted for header */
+    margin-left: -100px; /* Move the container further left */
+}
+
+.risk-card {
+    width: 30%; /* Thinner cards, adjust as needed */
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.classification-image {
+    width: 100%; /* Ensure image fills the available width of the card */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Optional: to match the card's rounded corners */
+}
+        header {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+        
+        .risk-card h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .risk-card form label, .risk-card form input, .risk-card form button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .risk-card form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .risk-card form button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .risk-card p {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #444;
+        }
+        .feature {
+            margin-top: 10px;
+        }
+        .card-header {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .card-header div {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Fetal and Maternal Classification Dashboard</h1>
+    </header>
+
+    <div class="container">
+        <!-- Maternal Risk Card (on the left) -->
+        <div class="risk-card">
+            <h2>Maternal Risk</h2>
+                {% if maternal_risk == "High Risk" %}
+                <img src="{{ url_for('static', filename='images/high_risk.heic') }}" alt="High Risk Image" class="classification-image">
+            {% elif maternal_risk == "Low Risk" %}
+                <img src="{{ url_for('static', filename='images/low_risk.heic') }}" alt="Low Risk Image" class="classification-image">
+                {% elif maternal_risk == "Mid Risk" %}
+                <img src="{{ url_for('static', filename='images/mid_risk.heic') }}" alt="Low Risk Image" class="classification-image">
+            {% endif %}
+        
+            <div class="card-header">
+
+                <h3>Maternal Risk Features</h3>
+                <div><strong>Age:</strong> {{ data.age if data else 'N/A' }}</div>
+                <div><strong>Systolic BP:</strong> {{ data.systolic_bp if data else 'N/A' }}</div>
+                <div><strong>Diastolic BP:</strong> {{ data.diastolic_bp if data else 'N/A' }}</div>
+                <div><strong>Blood Sugar:</strong> {{ data.bs if data else 'N/A' }}</div>
+                <div><strong>Body Temperature:</strong> {{ data.body_temp if data else 'N/A' }}</div>
+                <div><strong>Heart Rate:</strong> {{ data.heart_rate if data else 'N/A' }}</div>
+            </div>
+            
+            <form method="POST" action="/predict_maternal">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" value="{{ data.age if data else '' }}" required>
+
+                <label for="systolicBP">Systolic BP</label>
+                <input type="number" id="systolicBP" name="systolicBP" value="{{ data.systolic_bp if data else '' }}" required>
+
+                <label for="diastolicBP">Diastolic BP</label>
+                <input type="number" id="diastolicBP" name="diastolicBP" value="{{ data.diastolic_bp if data else '' }}" required>
+
+                <label for="bs">Blood Sugar</label>
+                <input type="number" id="bs" name="bs" value="{{ data.bs if data else '' }}" required>
+
+                <label for="bodyTemp">Body Temperature</label>
+                <input type="number" id="bodyTemp" name="bodyTemp" value="{{ data.body_temp if data else '' }}" required min="20" max="45" step="0.1">
+
+
+                <label for="heartRate">Heart Rate</label>
+                <input type="number" id="heartRate" name="heartRate" value="{{ data.heart_rate if data else '' }}" required>
+
+                <button type="submit">Predict Maternal Risk</button>
+            </form>
+
+            {% if maternal_risk %}
+                <p>Maternal Risk Level: {{ maternal_risk }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Fetal Risk Card (in the middle) -->
+        <div class="risk-card">
+            <h2>Fetal Risk</h2>
+            {% if fetal_risk == "Normal" %}
+    <img src="{{ url_for('static', filename='images/normal.heic') }}" alt="Normal Image" class="classification-image">
+{% elif fetal_risk == "Suspect" %}
+    <img src="{{ url_for('static', filename='images/suspect.heic') }}" alt="Suspect Image" class="classification-image">
+{% elif fetal_risk == "Pathological" %}
+    <img src="{{ url_for('static', filename='images/pathological.heic') }}" alt="Pathological Image" class="classification-image">
+{% endif %}
+            <div class="card-header">
+                <h3>Fetal Risk Features</h3>
+                <div><strong>Baseline Value:</strong> {{ fetal_data.baseline_value if fetal_data else 'N/A' }}</div>
+                <div><strong>Accelerations:</strong> {{ fetal_data.accelerations if fetal_data else 'N/A' }}</div>
+                <div><strong>Fetal Movement:</strong> {{ fetal_data.fetal_movement if fetal_data else 'N/A' }}</div>
+                <div><strong>Uterine Contractions:</strong> {{ fetal_data.uterine_contractions if fetal_data else 'N/A' }}</div>
+                <div><strong>Light Decelerations:</strong> {{ fetal_data.light_decelerations if fetal_data else 'N/A' }}</div>
+                <div><strong>Severe Decelerations:</strong> {{ fetal_data.severe_decelerations if fetal_data else 'N/A' }}</div>
+                <div><strong>Prolonged Decelerations:</strong> {{ fetal_data.prolongued_decelerations if fetal_data else 'N/A' }}</div>
+                <div><strong>Abnormal Short-Term Variability:</strong> {{ fetal_data.abnormal_short_term_variability if fetal_data else 'N/A' }}</div>
+                <div><strong>Mean Short-Term Variability:</strong> {{ fetal_data.mean_value_of_short_term_variability if fetal_data else 'N/A' }}</div>
+                <div><strong>% Time Abnormal Long-Term Variability:</strong> {{ fetal_data.percentage_of_time_with_abnormal_long_term_variability if fetal_data else 'N/A' }}</div>
+                <div><strong>Mean Long-Term Variability:</strong> {{ fetal_data.mean_value_of_long_term_variability if fetal_data else 'N/A' }}</div>
+            </div>
+            
+            <form method="POST" action="/predict_fetal">
+                <label for="baseline_value">Baseline Value</label>
+                <input type="number" id="baseline_value" name="baseline_value" value="{{ fetal_data.baseline_value if fetal_data else '' }}" required>
+
+                <label for="accelerations">Accelerations</label>
+                <input type="number" id="accelerations" name="accelerations" value="{{ fetal_data.accelerations if fetal_data else '' }}" required>
+
+                <label for="fetal_movement">Fetal Movement</label>
+                <input type="number" id="fetal_movement" name="fetal_movement" value="{{ fetal_data.fetal_movement if fetal_data else '' }}" required>
+
+                <label for="uterine_contractions">Uterine Contractions</label>
+                <input type="number" id="uterine_contractions" name="uterine_contractions" value="{{ fetal_data.uterine_contractions if fetal_data else '' }}" required>
+
+                <label for="light_decelerations">Light Decelerations</label>
+                <input type="number" id="light_decelerations" name="light_decelerations" value="{{ fetal_data.light_decelerations if fetal_data else '' }}" required>
+
+                <label for="severe_decelerations">Severe Decelerations</label>
+                <input type="number" id="severe_decelerations" name="severe_decelerations" value="{{ fetal_data.severe_decelerations if fetal_data else '' }}" required>
+
+                <label for="prolongued_decelerations">Prolonged Decelerations</label>
+                <input type="number" id="prolongued_decelerations" name="prolongued_decelerations" value="{{ fetal_data.prolongued_decelerations if fetal_data else '' }}" required>
+
+                <label for="abnormal_short_term_variability">Abnormal Short-Term Variability</label>
+                <input type="number" id="abnormal_short_term_variability" name="abnormal_short_term_variability" value="{{ fetal_data.abnormal_short_term_variability if fetal_data else '' }}" required>
+
+                <label for="mean_value_of_short_term_variability">Mean Short-Term Variability</label>
+                <input type="number" id="mean_value_of_short_term_variability" name="mean_value_of_short_term_variability" value="{{ fetal_data.mean_value_of_short_term_variability if fetal_data else '' }}" required>
+
+                <label for="percentage_of_time_with_abnormal_long_term_variability">% Time Abnormal Long-Term Variability</label>
+                <input type="number" id="percentage_of_time_with_abnormal_long_term_variability" name="percentage_of_time_with_abnormal_long_term_variability" value="{{ fetal_data.percentage_of_time_with_abnormal_long_term_variability if fetal_data else '' }}" required>
+
+                <label for="mean_value_of_long_term_variability">Mean Long-Term Variability</label>
+                <input type="number" id="mean_value_of_long_term_variability" name="mean_value_of_long_term_variability" value="{{ fetal_data.mean_value_of_long_term_variability if fetal_data else '' }}" required>
+
+                <button type="submit">Predict Fetal Risk</button>
+            </form>
+
+            {% if fetal_risk %}
+                <p>Fetal Risk Level: {{ fetal_risk }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="recommendations-card" class="{% if maternal_risk == 'High Risk' %}high-risk{% endif %}">
+        <h2>Recommendations</h2>
+        <ul>
+            
+                
+                {% if maternal_risk == 'Low Risk' %}
+                    <span class="warning-text">Continue routine 4 hourly  observations Repeat observation if patient
+                        condition changes
+                        <br><br><br>
+                        Inform midwife/nurse in charge who must assess the patient
+                        immediately. 
+                        <br><br><br>
+                        Midwife/nurse to decide if increased frequency of monitoring and/or escalation of clinical care
+                        are required.
+                        <br><br><br>
+                        If concerned about patient contact
+                        SHO If symptoms of pre eclampsia (headache, visual disturbance, abdominal pain) lower threshold
+                        for escalation</span>
+                {% else %}
+                    {{ maternal_recommendations }}
+                {% endif %}
+            
+                 
+                {% if fetal_risk == 'Suspect' %}
+                    <span class="warning-text">
+                        Inform midwife/burse in charge(consider critical care outreach)
+                        
+                        <br><br><br>
+                        Midwife/nurse to immediately review the patient
+                        <br><br><br>
+
+                        Contact middle grade doctor obstetric (ST/Reg/Trust Grade) and consider early consultant
+                        involvement
+                        <br><br><br>
+                        Inform obstetric anaesthetist Care to be provided in appropriately monitored
+                        environment 
+                        <br><br><br>
+                        Increase the frequency of
+                        observations to 1 hourly If symptoms of pre eclampsia (headache, visual disturbance, abdominal pain) lower threshold
+                        for escalation</span>
+                {% else %}
+                    {{ fetal_recommendations }}
+                {% endif %}
+            
+        </ul>
+    </div>
+    
+</body>
+</html>
